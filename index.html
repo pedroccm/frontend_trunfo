@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual McLaren Cards - Complete</title>
+    
+    <!-- React and ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel Standalone for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Socket.IO client -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-u/2WwQd4QqK1u1Aq1iQ1+Kq1K3H7h8WmKxgqYkq0B2qC9I/2p0X6QwXl8JcYQ3Qh" crossorigin="anonymous"></script>
+    
+    <!-- Import Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Variables from Style Guide */
+        :root {
+            --color-primary: #E54E44;
+            --color-secondary: #0F0F0F;
+            --color-accent: #FFFFDE;
+            --color-success: #22C55E;
+            --color-danger: #EF4444;
+            --font-family-primary: 'Roboto Condensed', sans-serif;
+            --border-radius-lg: 20px;
+            --border-radius-xl: 30px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-primary);
+            background-color: #0f0f0f;
+            background-image: url('./Acelerados-2.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Viewport Container - Always fits screen */
+        .viewport-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #0f0f0f;
+            background-image: url('./Acelerados-2.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            overflow: hidden;
+        }
+
+        /* Scalable wrapper - this will be scaled */
+        .scalable-wrapper {
+            transform-origin: center center;
+            display: flex;
+            align-items: center;
+            gap: 5vw;
+        }
+
+        /* Middle column logo container */
+        .logo-container {
+            width: 20vw;
+            height: 1050px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Logo styling */
+        .logo-placeholder {
+            width: 20vw;
+            height: 20vw;
+            background-image: url('./logo.png');
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Original Card Design - Fixed dimensions */
+        .card-design {
+            width: 750px;
+            height: 1050px;
+            position: relative;
+        }
+
+        .card {
+            width: 750px;
+            height: 1050px;
+            position: relative;
+            
+            /* BACKGROUND OPTIONS - Choose one: */
+            /* Option 1: Image Background */
+            background-color: #0F0F0F;
+            background-image: url('./card-back.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            
+            border-radius: var(--border-radius-xl);
+            padding: var(--spacing-xl);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-xl);
+            box-shadow: 0 8px 32px rgba(15, 15, 15, 0.6);
+            box-sizing: border-box;
+            overflow: hidden;
+            
+            /* Card tilt animation */
+            transform: perspective(1000px) 
+                       rotateX(var(--rotate-x, 0deg)) 
+                       rotateY(var(--rotate-y, 0deg))
+                       scale(var(--scale, 1));
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+            transform-style: preserve-3d;
+        }
+
+        .card:hover {
+            box-shadow: 0 20px 40px rgba(15, 15, 15, 0.7);
+        }
+
+        /* Holographic overlay effect */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: var(--border-radius-xl);
+            pointer-events: none;
+            z-index: 1;
+            
+            /* Pokemon trainer gallery holographic gradient */
+            background: repeating-linear-gradient(
+                calc(var(--rotate-angle, -22deg) + var(--tilt-x, 0deg)),
+                hsla(283, 49%, 60%, 0.6) 5%,
+                hsla(2, 74%, 59%, 0.6) 10%,
+                hsla(53, 67%, 53%, 0.6) 15%,
+                hsla(93, 56%, 52%, 0.6) 20%,
+                hsla(176, 38%, 50%, 0.6) 25%,
+                hsla(228, 100%, 77%, 0.6) 30%,
+                hsla(283, 49%, 61%, 0.6) 35%
+            );
+            
+            background-size: 300% 400%;
+            background-position: var(--bg-x, 0%) var(--bg-y, 0%);
+            background-blend-mode: color-dodge;
+            filter: brightness(calc(var(--brightness, 1) + 0.2)) contrast(2.3) saturate(1.5);
+            opacity: calc(var(--opacity, 0.5) + 0.3);
+            transition: all 0.1s ease;
+        }
+
+        /* Car Model Header */
+        .car-model {
+            width: 100%;
+            background-color: var(--color-primary);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-md) var(--spacing-lg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .car-model-text {
+            color: var(--color-accent);
+            font-family: var(--font-family-primary);
+            font-weight: 700;
+            font-size: 48px;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        /* Image Container */
+        .image-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .car-image {
+            width: 100%;
+            height: 438px;
+            object-fit: cover;
+            border-radius: var(--border-radius-lg);
+        }
+
+        /* Car Specifications */
+        .car-specs {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .spec-row {
+            width: 100%;
+            height: 58px;
+            background-color: var(--color-secondary);
+            border: 1px solid var(--color-accent);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-sm) var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--spacing-md);
+            cursor: pointer;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            user-select: none;
+            transform: scale(1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Interactive States */
+        .spec-row:hover {
+            background-color: var(--color-accent);
+            border: 1px solid var(--color-accent);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .spec-row:hover .spec-label,
+        .spec-row:hover .spec-value {
+            color: var(--color-secondary);
+        }
+
+        .spec-row:active {
+            transform: scale(0.98);
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .spec-row.pressed {
+            background-color: var(--color-accent);
+            border: 1px solid var(--color-primary);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(229, 78, 68, 0.25);
+        }
+
+        /* =================================================================
+           GAME STATE STYLES - For card comparison gameplay
+           ================================================================= */
+        
+        /* Loading state during card comparison */
+        .spec-row.comparing {
+            background-color: var(--color-accent);
+            border: 1px solid var(--color-primary);
+            transform: scale(1.02);
+            pointer-events: none;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(229, 78, 68, 0.25);
+        }
+
+        .spec-row.comparing::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 150%;
+            height: 100%;
+            background: repeating-linear-gradient(60deg, 
+                        transparent, 
+                        transparent 0.75rem, 
+                        rgba(229, 78, 68, 0.3) 0.75rem, 
+                        rgba(229, 78, 68, 0.3) 1.5rem);
+            animation: loadingStripes 1s infinite linear;
+            z-index: 1;
+        }
+
+        .spec-row.comparing .spec-label,
+        .spec-row.comparing .spec-value {
+            position: relative;
+            z-index: 2;
+            color: var(--color-secondary);
+        }
+
+        /* Winner state - successful comparison */
+        .spec-row.winner {
+            background-color: var(--color-success);
+            border: 1px solid var(--color-success);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+            animation: winnerPulse 2s ease-in-out;
+            pointer-events: none;
+        }
+
+        /* Loser state - unsuccessful comparison */
+        .spec-row.loser {
+            background-color: var(--color-danger);
+            border: 1px solid var(--color-danger);
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+            animation: loserShake 0.6s ease-in-out;
+            pointer-events: none;
+        }
+
+        /* Text color for winner and loser states */
+        .spec-row.winner .spec-label,
+        .spec-row.winner .spec-value,
+        .spec-row.loser .spec-label,
+        .spec-row.loser .spec-value {
+            color: white;
+        }
+
+        /* =================================================================
+           GAME ANIMATIONS
+           ================================================================= */
+        
+        /* Loading animation with diagonal stripes */
+        @keyframes loadingStripes {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-1.75rem);
+            }
+        }
+
+        /* Winner celebration animation */
+        @keyframes winnerPulse {
+            0% {
+                transform: scale(1.02);
+                box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 8px 24px rgba(34, 197, 94, 0.5);
+            }
+            100% {
+                transform: scale(1.05);
+                box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4);
+            }
+        }
+
+        /* Loser disappointment animation */
+        @keyframes loserShake {
+            0%, 100% { transform: translateX(0) scale(0.98); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px) scale(0.98); }
+            20%, 40%, 60%, 80% { transform: translateX(2px) scale(0.98); }
+        }
+
+        /* =================================================================
+           CONFETTI SYSTEM - For winner celebration
+           ================================================================= */
+        
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .confetti {
+            position: absolute;
+            width: var(--confetti-size, 8px);
+            height: var(--confetti-size, 8px);
+            background: var(--color-success);
+            border-radius: 50%;
+            animation: confettiExplode 2s ease-out forwards;
+        }
+
+        .confetti:nth-child(odd) {
+            background: var(--color-primary);
+        }
+
+        .confetti:nth-child(3n) {
+            background: var(--color-accent);
+        }
+
+        @keyframes confettiExplode {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(0) rotate(0deg);
+            }
+            10% {
+                opacity: 1;
+                transform: translate(var(--x), var(--y)) scale(1) rotate(90deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(calc(var(--x) * 3), calc(var(--y) * 3)) scale(0.5) rotate(720deg);
+            }
+        }
+
+        .spec-row:active .spec-label,
+        .spec-row:active .spec-value,
+        .spec-row.pressed .spec-label,
+        .spec-row.pressed .spec-value {
+            color: var(--color-secondary);
+        }
+
+        .spec-label,
+        .spec-value {
+            color: var(--color-accent);
+            font-family: var(--font-family-primary);
+            font-weight: 700;
+            font-size: 32px;
+            word-wrap: break-word;
+        }
+
+        .spec-value {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Card Footer */
+        .card-footer {
+            width: 100%;
+            text-align: center;
+            color: var(--color-accent);
+            font-family: var(--font-family-primary);
+            font-style: italic;
+            font-weight: 400;
+            font-size: 24px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const SOCKET_URL = (new URLSearchParams(window.location.search)).get('backend') || 'http://localhost:3001';
+
+        /* =================================================================
+           SUPER TRUNFO GAME DATA AND LOGIC
+           ================================================================= */
+        
+        // Car database with Super Trunfo attributes (will be replaced by JSON loading)
+        let CAR_DATABASE = {
+            attributes: {
+                maxSpeed: { name: "Velocidade Máxima", unit: "Km/h", direction: "max" },
+                power: { name: "Potência", unit: "HP", direction: "max" },
+                acceleration: { name: "0-100 Km/h", unit: "seg", direction: "min" },
+                displacement: { name: "Cilindradas", unit: "cc", direction: "max" },
+                weight: { name: "Peso", unit: "Kg", direction: "min" }
+            },
+            cards: [
+                {
+                    id: "mclaren_speedtail",
+                    name: "McLaren Speedtail",
+                    image: "./carimage.png",
+                    attrs: { maxSpeed: 403, power: 1070, acceleration: 2.5, displacement: 3994, weight: 1430 }
+                },
+                {
+                    id: "bugatti_chiron",
+                    name: "Bugatti Chiron",
+                    image: "./carimage.png",
+                    attrs: { maxSpeed: 420, power: 1479, acceleration: 2.4, displacement: 7993, weight: 1995 }
+                },
+                {
+                    id: "koenigsegg_jesko",
+                    name: "Koenigsegg Jesko",
+                    image: "./carimage.png",
+                    attrs: { maxSpeed: 530, power: 1600, acceleration: 2.5, displacement: 5000, weight: 1420 }
+                },
+                {
+                    id: "ferrari_laferrari",
+                    name: "Ferrari LaFerrari",
+                    image: "./carimage.png",
+                    attrs: { maxSpeed: 372, power: 950, acceleration: 2.4, displacement: 6262, weight: 1585 }
+                },
+                {
+                    id: "lamborghini_reventon",
+                    name: "Lamborghini Reventon",
+                    image: "./carimage.png",
+                    attrs: { maxSpeed: 340, power: 650, acceleration: 3.3, displacement: 6496, weight: 1665 }
+                },
+                {
+                    id: "porsche_918_spyder",
+                    name: "Porsche 918 Spyder",
+                    image: "./carimage.png",
+                    attrs: { maxSpeed: 345, power: 887, acceleration: 2.2, displacement: 4593, weight: 1674 }
+                },
+                {
+                    id: "aston_martin_valkyrie",
+                    name: "Aston Martin Valkyrie",
+                    image: "./carimage.png",
+                    attrs: { maxSpeed: 402, power: 1160, acceleration: 2.5, displacement: 6500, weight: 1030 }
+                },
+                {
+                    id: "mercedes_amg_one",
+                    name: "Mercedes-AMG ONE",
+                    image: "./carimage.png",
+                    attrs: { maxSpeed: 352, power: 1063, acceleration: 2.9, displacement: 1600, weight: 1695 }
+                }
+            ]
+        };
+        
+        // Function to load car data from JSON (optional enhancement)
+        const loadCarDatabase = async () => {
+            try {
+                const response = await fetch('./CARS/cars.json');
+                const data = await response.json();
+                CAR_DATABASE = data;
+                console.log('Loaded', data.cards.length, 'cars from JSON');
+                return true;
+            } catch (error) {
+                console.log('Failed to load JSON, using inline data:', error.message);
+                return false;
+            }
+        };
+        
+        // Super Trunfo Game Logic Class
+        class SuperTrunfoGame {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.player1Cards = [];
+                this.player2Cards = [];
+                this.potCards = [];
+                this.currentPlayer = 1;
+                this.gamePhase = 'start'; // 'start', 'playing', 'comparing', 'round_result', 'game_over'
+                this.currentComparison = null;
+                this.roundWinner = null;
+                this.gameWinner = null;
+            }
+            
+            startNewGame() {
+                this.reset();
+                
+                // Check if CAR_DATABASE is loaded
+                if (!CAR_DATABASE || !CAR_DATABASE.cards) {
+                    return this.getGameState();
+                }
+                
+                // Shuffle cards
+                const shuffledCards = [...CAR_DATABASE.cards].sort(() => Math.random() - 0.5);
+                
+                // Distribute cards evenly
+                for (let i = 0; i < shuffledCards.length; i++) {
+                    if (i % 2 === 0) {
+                        this.player1Cards.push(shuffledCards[i]);
+                    } else {
+                        this.player2Cards.push(shuffledCards[i]);
+                    }
+                }
+                
+                this.gamePhase = 'playing';
+                return this.getGameState();
+            }
+            
+            makeMove(attribute) {
+                if (this.gamePhase !== 'playing') return null;
+                
+                const player1Card = this.player1Cards[0];
+                const player2Card = this.player2Cards[0];
+                
+                if (!player1Card || !player2Card) {
+                    this.endGame();
+                    return this.getGameState();
+                }
+                
+                // Start comparison
+                this.gamePhase = 'comparing';
+                this.currentComparison = {
+                    attribute,
+                    player1Card,
+                    player2Card,
+                    player1Value: player1Card.attrs[attribute],
+                    player2Value: player2Card.attrs[attribute]
+                };
+                
+                // Calculate winner based on attribute direction
+                const attrConfig = CAR_DATABASE.attributes[attribute];
+                let winner = null;
+                
+                if (attrConfig.direction === 'max') {
+                    if (this.currentComparison.player1Value > this.currentComparison.player2Value) {
+                        winner = 1;
+                    } else if (this.currentComparison.player2Value > this.currentComparison.player1Value) {
+                        winner = 2;
+                    }
+                } else { // 'min' direction
+                    if (this.currentComparison.player1Value < this.currentComparison.player2Value) {
+                        winner = 1;
+                    } else if (this.currentComparison.player2Value < this.currentComparison.player1Value) {
+                        winner = 2;
+                    }
+                }
+                
+                this.roundWinner = winner;
+                this.currentComparison.winner = winner;
+                
+                return this.getGameState();
+            }
+            
+            resolveRound() {
+                if (this.gamePhase !== 'comparing') return null;
+                
+                // Remove played cards from tops of decks
+                const player1PlayedCard = this.player1Cards.shift();
+                const player2PlayedCard = this.player2Cards.shift();
+                
+                const cardsToWin = [player1PlayedCard, player2PlayedCard, ...this.potCards];
+                this.potCards = [];
+                
+                if (this.roundWinner === 1) {
+                    // Player 1 wins - add cards to bottom of their deck
+                    this.player1Cards.push(...cardsToWin);
+                    this.currentPlayer = 1; // Winner chooses next attribute
+                } else if (this.roundWinner === 2) {
+                    // Player 2 wins - add cards to bottom of their deck
+                    this.player2Cards.push(...cardsToWin);
+                    this.currentPlayer = 2; // Winner chooses next attribute
+                } else {
+                    // Tie - cards go to pot
+                    this.potCards.push(...cardsToWin);
+                    // Current player stays the same for ties
+                }
+                
+                // Check for game end
+                if (this.player1Cards.length === 0 || this.player2Cards.length === 0) {
+                    this.endGame();
+                } else {
+                    this.gamePhase = 'playing';
+                }
+                
+                return this.getGameState();
+            }
+            
+            endGame() {
+                this.gamePhase = 'game_over';
+                if (this.player1Cards.length > this.player2Cards.length) {
+                    this.gameWinner = 1;
+                } else if (this.player2Cards.length > this.player1Cards.length) {
+                    this.gameWinner = 2;
+                } else {
+                    this.gameWinner = null; // Draw (unlikely)
+                }
+            }
+            
+            getGameState() {
+                return {
+                    gamePhase: this.gamePhase,
+                    currentPlayer: this.currentPlayer,
+                    player1Card: this.player1Cards[0] || null,
+                    player2Card: this.player2Cards[0] || null,
+                    player1CardCount: this.player1Cards.length,
+                    player2CardCount: this.player2Cards.length,
+                    potCount: this.potCards.length,
+                    currentComparison: this.currentComparison,
+                    roundWinner: this.roundWinner,
+                    gameWinner: this.gameWinner
+                };
+            }
+        }
+
+        const CardComponent = ({ 
+            card,
+            playerNumber,
+            gameState,
+            onSpecClick,
+            isActive = false,
+            showResults = false
+        }) => {
+            const cardRef = useRef(null);
+            const [showConfetti, setShowConfetti] = useState(false);
+            
+            // Display card info or placeholder
+            if (!card) {
+                return (
+                    <div className="card-design">
+                        <div className="card" ref={cardRef}>
+                            <div className="car-model">
+                                <div className="car-model-text">Waiting...</div>
+                            </div>
+                            <div className="image-container">
+                                <div style={{width: '100%', height: '438px', background: 'rgba(255,255,255,0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent)'}}>No Card</div>
+                            </div>
+                            <div className="car-specs"></div>
+                            <div className="card-footer">Super Trunfo Online</div>
+                        </div>
+                    </div>
+                );
+            }
+
+            const handleSpecClick = (specName) => {
+                // Only allow current player to click during playing phase
+                if (gameState.gamePhase !== 'playing' || gameState.currentPlayer !== playerNumber || !isActive) return;
+                
+                onSpecClick(specName);
+            };
+
+            // Handle confetti when this player wins (only after results are shown)
+            useEffect(() => {
+                if (gameState.roundWinner === playerNumber && 
+                    gameState.gamePhase === 'comparing' && 
+                    showResults) {
+                    setShowConfetti(true);
+                    setTimeout(() => createConfetti(), 100);
+                    setTimeout(() => setShowConfetti(false), 3000);
+                }
+            }, [gameState.roundWinner, gameState.gamePhase, showResults, playerNumber]);
+
+            /* =================================================================
+               CONFETTI CELEBRATION SYSTEM
+               ================================================================= */
+            const createConfetti = () => {
+                const confettiContainer = document.querySelector('.confetti-container');
+                if (!confettiContainer) return;
+                
+                // Get the position of the winner button within this specific card
+                const cardElement = cardRef.current;
+                if (!cardElement) return;
+                
+                const winnerButton = cardElement.querySelector('.spec-row.winner');
+                if (!winnerButton) return;
+                
+                // Get the actual screen positions accounting for scaling
+                const winnerRect = winnerButton.getBoundingClientRect();
+                const cardRect = cardElement.getBoundingClientRect();
+                
+                // Calculate the center of the winner button relative to the actual rendered position
+                const buttonCenterX = winnerRect.left + (winnerRect.width / 2);
+                const buttonCenterY = winnerRect.top + (winnerRect.height / 2);
+                
+                // Clear existing confetti
+                confettiContainer.innerHTML = '';
+                
+                // Calculate scaling factor for confetti based on current viewport and card scaling
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                const baseWidth = 1920; // Reference width for scaling
+                const scaleFactor = Math.min(viewportWidth / baseWidth, viewportHeight / 1080);
+                const confettiSize = Math.max(4, 8 * scaleFactor); // Minimum 4px, scales with viewport
+                const velocityScale = scaleFactor;
+                
+                // Create 30 confetti pieces exploding from button center
+                for (let i = 0; i < 30; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    
+                    // Random angle for explosion (0-360 degrees)
+                    const angle = (Math.PI * 2 * i) / 30 + (Math.random() - 0.5) * 0.5;
+                    const baseVelocity = 100 + Math.random() * 100;
+                    const velocity = baseVelocity * velocityScale; // Scale velocity with viewport
+                    
+                    // Calculate explosion direction from button center
+                    const deltaX = Math.cos(angle) * velocity;
+                    const deltaY = Math.sin(angle) * velocity;
+                    
+                    // Start all confetti at the exact same coordinate (button center)
+                    confetti.style.left = buttonCenterX + 'px';
+                    confetti.style.top = buttonCenterY + 'px';
+                    confetti.style.transform = 'translate(-50%, -50%)'; // Center the confetti piece itself
+                    
+                    // Set CSS custom properties for animation movement and size
+                    confetti.style.setProperty('--confetti-size', confettiSize + 'px');
+                    confetti.style.setProperty('--x', deltaX + 'px');
+                    confetti.style.setProperty('--y', deltaY + 'px');
+                    
+                    // Random colors and timing
+                    const colors = ['var(--color-success)', 'var(--color-primary)', 'var(--color-accent)', '#FFD700', '#FF69B4'];
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDelay = Math.random() * 0.1 + 's';
+                    confetti.style.animationDuration = (1.5 + Math.random() * 0.5) + 's';
+                    
+                    confettiContainer.appendChild(confetti);
+                }
+            };
+
+            /* =================================================================
+               SPEC ROW CLASS CALCULATION
+               Determines the visual state based on game state and comparison results
+               ================================================================= */
+            const getSpecRowClass = (specName) => {
+                let classes = 'spec-row';
+                
+                // Show comparing state for the selected attribute
+                if (gameState.gamePhase === 'comparing' && 
+                    gameState.currentComparison && 
+                    gameState.currentComparison.attribute === specName) {
+                    
+                    // First show comparing animation, then results
+                    if (showResults) {
+                        if (gameState.roundWinner === playerNumber) {
+                            classes += ' winner';
+                        } else if (gameState.roundWinner && gameState.roundWinner !== playerNumber) {
+                            classes += ' loser';
+                        }
+                    } else {
+                        classes += ' comparing';
+                    }
+                }
+                
+                return classes;
+            };
+
+            /* =================================================================
+               POKEMON CARD HOLOGRAPHIC MOUSE TRACKING
+               ================================================================= */
+            useEffect(() => {
+                const card = cardRef.current;
+                if (!card) return;
+
+                const handleMouseMove = (e) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    // Calculate rotation values (-15 to 15 degrees)
+                    const rotateX = ((y - centerY) / centerY) * -15;
+                    const rotateY = ((x - centerX) / centerX) * 15;
+                    
+                    // Calculate holographic effect values
+                    const pointerX = (x / rect.width) * 100;
+                    const pointerY = (y / rect.height) * 100;
+                    const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                    const maxDistance = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
+                    const intensity = 1 - (distance / maxDistance);
+                    
+                    // Update CSS custom properties
+                    card.style.setProperty('--rotate-x', `${rotateX}deg`);
+                    card.style.setProperty('--rotate-y', `${rotateY}deg`);
+                    card.style.setProperty('--scale', '1.05');
+                    card.style.setProperty('--bg-x', `${pointerX}%`);
+                    card.style.setProperty('--bg-y', `${pointerY}%`);
+                    card.style.setProperty('--brightness', intensity);
+                    card.style.setProperty('--opacity', intensity * 0.8);
+                    card.style.setProperty('--tilt-x', `${rotateY * 0.5}deg`);
+                };
+
+                const handleMouseLeave = () => {
+                    // Reset to default values
+                    card.style.setProperty('--rotate-x', '0deg');
+                    card.style.setProperty('--rotate-y', '0deg');
+                    card.style.setProperty('--scale', '1');
+                    card.style.setProperty('--bg-x', '0%');
+                    card.style.setProperty('--bg-y', '0%');
+                    card.style.setProperty('--brightness', '1');
+                    card.style.setProperty('--opacity', '0.5');
+                    card.style.setProperty('--tilt-x', '0deg');
+                };
+
+                card.addEventListener('mousemove', handleMouseMove);
+                card.addEventListener('mouseleave', handleMouseLeave);
+
+                return () => {
+                    card.removeEventListener('mousemove', handleMouseMove);
+                    card.removeEventListener('mouseleave', handleMouseLeave);
+                };
+            }, []);
+
+            return (
+                <div className="card-design">
+                    <div className="card" ref={cardRef}>
+                        <div className="car-model">
+                            <div className="car-model-text">{card.name}</div>
+                        </div>
+                        
+                        <div className="image-container">
+                            <img 
+                                className="car-image" 
+                                src={card.image} 
+                                alt={card.name}
+                            />
+                        </div>
+                        
+                        {/* =================================================================
+                            INTERACTIVE SPECIFICATION ROWS
+                            Click any spec to start Super Trunfo comparison (only current player)
+                            ================================================================= */}
+                        <div className="car-specs">
+                            <div 
+                                className={getSpecRowClass('maxSpeed')}
+                                onClick={() => handleSpecClick('maxSpeed')}
+                                style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                            >
+                                <div className="spec-label">{CAR_DATABASE.attributes.maxSpeed.name}</div>
+                                <div className="spec-value">{card.attrs.maxSpeed} {CAR_DATABASE.attributes.maxSpeed.unit}</div>
+                            </div>
+                            
+                            <div 
+                                className={getSpecRowClass('power')}
+                                onClick={() => handleSpecClick('power')}
+                                style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                            >
+                                <div className="spec-label">{CAR_DATABASE.attributes.power.name}</div>
+                                <div className="spec-value">{card.attrs.power} {CAR_DATABASE.attributes.power.unit}</div>
+                            </div>
+                            
+                            <div 
+                                className={getSpecRowClass('acceleration')}
+                                onClick={() => handleSpecClick('acceleration')}
+                                style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                            >
+                                <div className="spec-label">{CAR_DATABASE.attributes.acceleration.name}</div>
+                                <div className="spec-value">{card.attrs.acceleration} {CAR_DATABASE.attributes.acceleration.unit}</div>
+                            </div>
+                            
+                            <div 
+                                className={getSpecRowClass('displacement')}
+                                onClick={() => handleSpecClick('displacement')}
+                                style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                            >
+                                <div className="spec-label">{CAR_DATABASE.attributes.displacement.name}</div>
+                                <div className="spec-value">{card.attrs.displacement} {CAR_DATABASE.attributes.displacement.unit}</div>
+                            </div>
+                            
+                            <div 
+                                className={getSpecRowClass('weight')}
+                                onClick={() => handleSpecClick('weight')}
+                                style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                            >
+                                <div className="spec-label">{CAR_DATABASE.attributes.weight.name}</div>
+                                <div className="spec-value">{card.attrs.weight} {CAR_DATABASE.attributes.weight.unit}</div>
+                            </div>
+                        </div>
+                        
+                        <div className="card-footer">
+                            Super Trunfo Online
+                        </div>
+                    </div>
+                    
+                </div>
+            );
+        };
+
+        const DualCardContainer = () => {
+            const wrapperRef = useRef(null);
+            const socketRef = useRef(null);
+            const [gameState, setGameState] = useState({
+                gamePhase: 'start',
+                currentPlayer: 1,
+                player1Card: null,
+                player2Card: null,
+                player1CardCount: 0,
+                player2CardCount: 0,
+                potCount: 0,
+                currentComparison: null,
+                roundWinner: null,
+                gameWinner: null
+            });
+            const [gameStarted, setGameStarted] = useState(false);
+            const [roomId, setRoomId] = useState(null);
+            const [youAre, setYouAre] = useState(null); // 1 ou 2
+            const [localShowResults, setLocalShowResults] = useState(false);
+            const lastSigRef = useRef(null);
+            const timersRef = useRef({});
+
+            // Start new game
+            const startNewGame = () => {
+                if (!socketRef.current) return;
+                socketRef.current.emit('queue:join');
+            };
+
+            // Handle spec click from cards
+            const handleSpecClick = (attribute) => {
+                if (!socketRef.current || !roomId) return;
+                socketRef.current.emit('move:choose_attribute', { roomId, attribute });
+            };
+
+            // Scaling calculation function
+            const calculateScale = () => {
+                if (!wrapperRef.current) return;
+
+                const wrapper = wrapperRef.current;
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Original card dimensions
+                const cardWidth = 750;
+                const cardHeight = 1050;
+                
+                // Account for two cards + middle column with gaps + side margins (10vw each side = 20vw total)
+                const logoWidth = viewportWidth * 0.2; // 20vw logo width
+                const sideMargins = viewportWidth * 0.2; // 10vw on each side = 20vw total
+                const gapWidth = viewportWidth * 0.05; // 5vw gap between elements
+                const totalWidth = (cardWidth * 2) + logoWidth + (gapWidth * 2); // Two 5vw gaps
+                const availableWidth = viewportWidth - sideMargins;
+                
+                // Account for vertical margins (10vh top + 10vh bottom = 20vh total)
+                const verticalMargins = viewportHeight * 0.2; // 10vh on top and bottom = 20vh total
+                const availableHeight = viewportHeight - verticalMargins;
+                
+                // Calculate scale factors for both dimensions
+                const scaleX = availableWidth / totalWidth;
+                const scaleY = availableHeight / cardHeight;
+                
+                // Use the smaller scale to ensure it fits completely
+                const scale = Math.min(scaleX, scaleY) * 0.95; // 0.95 for small margin
+                
+                wrapper.style.transform = `scale(${scale})`;
+            };
+
+            useEffect(() => {
+                // Socket connection
+                const socket = io(SOCKET_URL, { transports: ['websocket'] });
+                socketRef.current = socket;
+
+                socket.on('connect', () => {
+                    // noop
+                });
+
+                socket.on('match:found', ({ roomId: rid, youAre: me }) => {
+                    setRoomId(rid);
+                    setYouAre(me);
+                    setGameStarted(true);
+                    setTimeout(() => calculateScale(), 10);
+                });
+
+                socket.on('game:state', (state) => {
+                    setGameState(state);
+
+                    // Manage local showResults to create winner/loser highlight while comparing
+                    if (state.gamePhase === 'comparing' && state.currentComparison) {
+                        const sig = `${state.currentComparison.attribute}|${state.currentComparison.player1Value}|${state.currentComparison.player2Value}`;
+                        if (lastSigRef.current !== sig) {
+                            lastSigRef.current = sig;
+                            setLocalShowResults(false);
+                            clearTimeout(timersRef.current.showTimer);
+                            timersRef.current.showTimer = setTimeout(() => setLocalShowResults(true), 700);
+                        }
+                    } else {
+                        lastSigRef.current = null;
+                        setLocalShowResults(false);
+                        clearTimeout(timersRef.current.showTimer);
+                    }
+                });
+
+                // Calculate on mount and resize
+                calculateScale();
+                window.addEventListener('resize', calculateScale);
+                const onOrientation = () => setTimeout(calculateScale, 100);
+                window.addEventListener('orientationchange', onOrientation);
+
+                return () => {
+                    window.removeEventListener('resize', calculateScale);
+                    window.removeEventListener('orientationchange', onOrientation);
+                    socket.disconnect();
+                };
+            }, []);
+
+            // Recalculate scale when game starts
+            useEffect(() => {
+                if (gameStarted) {
+                    setTimeout(calculateScale, 50);
+                }
+            }, [gameStarted]);
+
+            return (
+                <div className="viewport-container">
+                    {!gameStarted ? (
+                        /* Game Start Screen */
+                        <div style={{
+                            display: 'flex', 
+                            flexDirection: 'column', 
+                            alignItems: 'center', 
+                            justifyContent: 'center',
+                            height: '100vh',
+                            color: 'var(--color-accent)',
+                            textAlign: 'center',
+                            gap: '2rem'
+                        }}>
+                            <div className="logo-placeholder" style={{ width: '200px', height: '200px' }}></div>
+                            <h1 style={{ fontSize: '4rem', fontFamily: 'var(--font-family-primary)', fontWeight: '700' }}>Super Trunfo</h1>
+                            <p style={{ fontSize: '1.5rem', maxWidth: '600px', lineHeight: '1.5' }}>Compete with supercars! Choose attributes and win your opponent's cards.</p>
+                            <button 
+                                onClick={startNewGame}
+                                style={{
+                                    padding: '1rem 3rem',
+                                    fontSize: '1.5rem',
+                                    fontFamily: 'var(--font-family-primary)',
+                                    fontWeight: '700',
+                                    backgroundColor: 'var(--color-primary)',
+                                    color: 'var(--color-accent)',
+                                    border: 'none',
+                                    borderRadius: 'var(--border-radius-lg)',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s',
+                                    transform: 'scale(1)'
+                                }}
+                                onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
+                                onMouseLeave={e => e.target.style.transform = 'scale(1)'}
+                            >
+                                Start New Game
+                            </button>
+                        </div>
+                    ) : (
+                        /* Game Screen */
+                        <>
+                            <div className="scalable-wrapper" ref={wrapperRef}>
+                                <CardComponent 
+                                    card={gameState.player1Card}
+                                    playerNumber={1}
+                                    gameState={gameState}
+                                    onSpecClick={handleSpecClick}
+                                    isActive={gameState.currentPlayer === 1}
+                                    showResults={localShowResults}
+                                />
+                                
+                                {/* Middle column with game info */}
+                                <div className="logo-container" style={{ 
+                                    display: 'flex', 
+                                    flexDirection: 'column', 
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '2rem',
+                                    color: 'var(--color-accent)',
+                                    textAlign: 'center'
+                                }}>
+                                    <div className="logo-placeholder" style={{ width: '15vw', height: '15vw' }}></div>
+                                    
+                                    {/* Game Status */}
+                                    <div style={{ fontSize: '2rem', fontWeight: '700' }}>
+                                        {gameState.gamePhase === 'playing' && `Player ${gameState.currentPlayer}'s Turn`}
+                                        {gameState.gamePhase === 'comparing' && (localShowResults ? 'Result...' : 'Comparing...')}
+                                        {gameState.gamePhase === 'game_over' && `Player ${gameState.gameWinner} Wins!`}
+                                    </div>
+                                    
+                                    
+                                    {/* Card Counts */}
+                                    <div style={{ fontSize: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                        <div>Player 1: {gameState.player1CardCount} cards</div>
+                                        <div>Player 2: {gameState.player2CardCount} cards</div>
+                                        {gameState.potCount > 0 && <div>Pot: {gameState.potCount} cards</div>}
+                                    </div>
+                                    
+                                    {/* Comparison Result */}
+                                    {gameState.currentComparison && gameState.gamePhase === 'comparing' && (
+                                        <div style={{ 
+                                            padding: '1rem', 
+                                            backgroundColor: 'rgba(0,0,0,0.5)', 
+                                            borderRadius: 'var(--border-radius-lg)',
+                                            fontSize: '1.2rem'
+                                        }}>
+                                            <div>{CAR_DATABASE.attributes[gameState.currentComparison.attribute].name}:</div>
+                                            <div>P1: {gameState.currentComparison.player1Value} vs P2: {gameState.currentComparison.player2Value}</div>
+                                            {localShowResults && gameState.roundWinner && (
+                                                <div style={{ fontWeight: '700', color: 'var(--color-success)' }}>
+                                                    Player {gameState.roundWinner} Wins!
+                                                </div>
+                                            )}
+                                            {localShowResults && gameState.roundWinner === null && (
+                                                <div style={{ fontWeight: '700', color: 'var(--color-accent)' }}>Tie!</div>
+                                            )}
+                                        </div>
+                                    )}
+                                    
+                                    {/* New Game Button */}
+                                    {gameState.gamePhase === 'game_over' && (
+                                        <button 
+                                            onClick={startNewGame}
+                                            style={{
+                                                padding: '0.5rem 2rem',
+                                                fontSize: '1rem',
+                                                backgroundColor: 'var(--color-primary)',
+                                                color: 'var(--color-accent)',
+                                                border: 'none',
+                                                borderRadius: 'var(--border-radius-lg)',
+                                                cursor: 'pointer'
+                                            }}
+                                        >
+                                            New Game
+                                        </button>
+                                    )}
+                                </div>
+                                
+                                <CardComponent 
+                                    card={gameState.player2Card}
+                                    playerNumber={2}
+                                    gameState={gameState}
+                                    onSpecClick={handleSpecClick}
+                                    isActive={gameState.currentPlayer === 2}
+                                    showResults={localShowResults}
+                                />
+                            </div>
+                        </>
+                    )}
+                    
+                    {/* Global confetti container for both cards */}
+                    <div className="confetti-container"></div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [dataReady, setDataReady] = useState(false);
+            
+            useEffect(() => {
+                // Try to load JSON data on startup, but don't block the app
+                const initializeData = async () => {
+                    await loadCarDatabase();
+                    setDataReady(true);
+                };
+                
+                initializeData();
+            }, []);
+            
+            // Always render the app - we have fallback inline data
+            return <DualCardContainer />;
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

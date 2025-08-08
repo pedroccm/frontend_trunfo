@@ -1,0 +1,151 @@
+{
+    "attributes": {
+        "maxSpeed": {
+            "name": "Velocidade Máxima",
+            "unit": "Km/h",
+            "direction": "max"
+        },
+        "power": {
+            "name": "Potência",
+            "unit": "HP",
+            "direction": "max"
+        },
+        "acceleration": {
+            "name": "0-100 Km/h",
+            "unit": "seg",
+            "direction": "min"
+        },
+        "displacement": {
+            "name": "Cilindradas",
+            "unit": "cc",
+            "direction": "max"
+        },
+        "weight": {
+            "name": "Peso",
+            "unit": "Kg",
+            "direction": "min"
+        }
+    },
+    "cards": [
+        {
+            "id": "mclaren_speedtail",
+            "name": "McLaren Speedtail",
+            "image": "./CARS/mclaren_speedtail.jpg",
+            "attrs": {
+                "maxSpeed": 403,
+                "power": 1070,
+                "acceleration": 2.5,
+                "displacement": 3994,
+                "weight": 1430
+            }
+        },
+        {
+            "id": "bugatti_chiron",
+            "name": "Bugatti Chiron",
+            "image": "./CARS/bugatti_chiron.jpg",
+            "attrs": {
+                "maxSpeed": 420,
+                "power": 1479,
+                "acceleration": 2.4,
+                "displacement": 7993,
+                "weight": 1995
+            }
+        },
+        {
+            "id": "koenigsegg_jesko",
+            "name": "Koenigsegg Jesko",
+            "image": "./CARS/koenigsegg_jesko.jpg",
+            "attrs": {
+                "maxSpeed": 530,
+                "power": 1600,
+                "acceleration": 2.5,
+                "displacement": 5000,
+                "weight": 1420
+            }
+        },
+        {
+            "id": "ferrari_laferrari",
+            "name": "Ferrari LaFerrari",
+            "image": "./CARS/ferrari_laferrari.jpg",
+            "attrs": {
+                "maxSpeed": 372,
+                "power": 950,
+                "acceleration": 2.4,
+                "displacement": 6262,
+                "weight": 1585
+            }
+        },
+        {
+            "id": "lamborghini_reventon",
+            "name": "Lamborghini Reventon",
+            "image": "./CARS/lamborghini_reventon.jpg",
+            "attrs": {
+                "maxSpeed": 340,
+                "power": 650,
+                "acceleration": 3.3,
+                "displacement": 6496,
+                "weight": 1665
+            }
+        },
+        {
+            "id": "porsche_918_spyder",
+            "name": "Porsche 918 Spyder",
+            "image": "./CARS/porsche_918_spyder.jpg",
+            "attrs": {
+                "maxSpeed": 345,
+                "power": 887,
+                "acceleration": 2.2,
+                "displacement": 4593,
+                "weight": 1674
+            }
+        },
+        {
+            "id": "aston_martin_valkyrie",
+            "name": "Aston Martin Valkyrie",
+            "image": "./CARS/aston_martin_valkyrie.jpg",
+            "attrs": {
+                "maxSpeed": 402,
+                "power": 1160,
+                "acceleration": 2.5,
+                "displacement": 6500,
+                "weight": 1030
+            }
+        },
+        {
+            "id": "mercedes_amg_one",
+            "name": "Mercedes-AMG ONE",
+            "image": "./CARS/mercedes_amg_one.jpg",
+            "attrs": {
+                "maxSpeed": 352,
+                "power": 1063,
+                "acceleration": 2.9,
+                "displacement": 1600,
+                "weight": 1695
+            }
+        },
+        {
+            "id": "pagani_huayra",
+            "name": "Pagani Huayra",
+            "image": "./CARS/pagani_huayra.jpg",
+            "attrs": {
+                "maxSpeed": 383,
+                "power": 730,
+                "acceleration": 3.2,
+                "displacement": 5980,
+                "weight": 1350
+            }
+        },
+        {
+            "id": "hennessey_venom_f5",
+            "name": "Hennessey Venom F5",
+            "image": "./CARS/hennessey_venom_f5.jpg",
+            "attrs": {
+                "maxSpeed": 484,
+                "power": 1817,
+                "acceleration": 2.6,
+                "displacement": 6600,
+                "weight": 1360
+            }
+        }
+    ]
+}
