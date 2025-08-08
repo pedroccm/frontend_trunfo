@@ -699,16 +699,84 @@
             const cardRef = useRef(null);
             const [showConfetti, setShowConfetti] = useState(false);
             
-            // Display card info or placeholder
+            // SEMPRE chamar todos os hooks primeiro (antes de returns condicionais)
+            // Handle confetti when this player wins (only after results are shown)
+            useEffect(() => {
+                if (card && gameState.roundWinner === playerNumber && 
+                    gameState.gamePhase === 'comparing' && 
+                    showResults) {
+                    setShowConfetti(true);
+                    setTimeout(() => createConfetti(), 100);
+                    setTimeout(() => setShowConfetti(false), 3000);
+                }
+            }, [card, gameState.roundWinner, gameState.gamePhase, showResults, playerNumber]);
+
+            // POKEMON CARD HOLOGRAPHIC MOUSE TRACKING - sempre executar
+            useEffect(() => {
+                const cardElement = cardRef.current;
+                if (!cardElement) return;
+
+                const handleMouseMove = (e) => {
+                    const rect = cardElement.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    // Calculate rotation values (-15 to 15 degrees)
+                    const rotateX = ((y - centerY) / centerY) * -15;
+                    const rotateY = ((x - centerX) / centerX) * 15;
+                    
+                    // Calculate holographic effect values
+                    const pointerX = (x / rect.width) * 100;
+                    const pointerY = (y / rect.height) * 100;
+                    const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+                    const maxDistance = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
+                    const intensity = 1 - (distance / maxDistance);
+                    
+                    // Update CSS custom properties
+                    cardElement.style.setProperty('--rotate-x', `${rotateX}deg`);
+                    cardElement.style.setProperty('--rotate-y', `${rotateY}deg`);
+                    cardElement.style.setProperty('--scale', '1.05');
+                    cardElement.style.setProperty('--bg-x', `${pointerX}%`);
+                    cardElement.style.setProperty('--bg-y', `${pointerY}%`);
+                    cardElement.style.setProperty('--brightness', intensity);
+                    cardElement.style.setProperty('--opacity', intensity * 0.8);
+                    cardElement.style.setProperty('--tilt-x', `${rotateY * 0.5}deg`);
+                };
+
+                const handleMouseLeave = () => {
+                    // Reset to default values
+                    cardElement.style.setProperty('--rotate-x', '0deg');
+                    cardElement.style.setProperty('--rotate-y', '0deg');
+                    cardElement.style.setProperty('--scale', '1');
+                    cardElement.style.setProperty('--bg-x', '0%');
+                    cardElement.style.setProperty('--bg-y', '0%');
+                    cardElement.style.setProperty('--brightness', '1');
+                    cardElement.style.setProperty('--opacity', '0.5');
+                    cardElement.style.setProperty('--tilt-x', '0deg');
+                };
+
+                cardElement.addEventListener('mousemove', handleMouseMove);
+                cardElement.addEventListener('mouseleave', handleMouseLeave);
+
+                return () => {
+                    cardElement.removeEventListener('mousemove', handleMouseMove);
+                    cardElement.removeEventListener('mouseleave', handleMouseLeave);
+                };
+            }, []);
+            
+            // Display card info or placeholder APÓS todos os hooks
             if (!card) {
                 return (
                     <div className="card-design">
                         <div className="card" ref={cardRef}>
                             <div className="car-model">
-                                <div className="car-model-text">Waiting...</div>
+                                <div className="car-model-text">Aguardando...</div>
                             </div>
                             <div className="image-container">
-                                <div style={{width: '100%', height: '438px', background: 'rgba(255,255,255,0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent)'}}>No Card</div>
+                                <div style={{width: '100%', height: '438px', background: 'rgba(255,255,255,0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent)'}}>Sem Carta</div>
                             </div>
                             <div className="car-specs"></div>
                             <div className="card-footer">Super Trunfo Online</div>
@@ -723,17 +791,6 @@
                 
                 onSpecClick(specName);
             };
-
-            // Handle confetti when this player wins (only after results are shown)
-            useEffect(() => {
-                if (gameState.roundWinner === playerNumber && 
-                    gameState.gamePhase === 'comparing' && 
-                    showResults) {
-                    setShowConfetti(true);
-                    setTimeout(() => createConfetti(), 100);
-                    setTimeout(() => setShowConfetti(false), 3000);
-                }
-            }, [gameState.roundWinner, gameState.gamePhase, showResults, playerNumber]);
 
             /* =================================================================
                CONFETTI CELEBRATION SYSTEM
@@ -829,63 +886,7 @@
                 return classes;
             };
 
-            /* =================================================================
-               POKEMON CARD HOLOGRAPHIC MOUSE TRACKING
-               ================================================================= */
-            useEffect(() => {
-                const card = cardRef.current;
-                if (!card) return;
 
-                const handleMouseMove = (e) => {
-                    const rect = card.getBoundingClientRect();
-                    const x = e.clientX - rect.left;
-                    const y = e.clientY - rect.top;
-                    
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    
-                    // Calculate rotation values (-15 to 15 degrees)
-                    const rotateX = ((y - centerY) / centerY) * -15;
-                    const rotateY = ((x - centerX) / centerX) * 15;
-                    
-                    // Calculate holographic effect values
-                    const pointerX = (x / rect.width) * 100;
-                    const pointerY = (y / rect.height) * 100;
-                    const distance = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-                    const maxDistance = Math.sqrt(Math.pow(centerX, 2) + Math.pow(centerY, 2));
-                    const intensity = 1 - (distance / maxDistance);
-                    
-                    // Update CSS custom properties
-                    card.style.setProperty('--rotate-x', `${rotateX}deg`);
-                    card.style.setProperty('--rotate-y', `${rotateY}deg`);
-                    card.style.setProperty('--scale', '1.05');
-                    card.style.setProperty('--bg-x', `${pointerX}%`);
-                    card.style.setProperty('--bg-y', `${pointerY}%`);
-                    card.style.setProperty('--brightness', intensity);
-                    card.style.setProperty('--opacity', intensity * 0.8);
-                    card.style.setProperty('--tilt-x', `${rotateY * 0.5}deg`);
-                };
-
-                const handleMouseLeave = () => {
-                    // Reset to default values
-                    card.style.setProperty('--rotate-x', '0deg');
-                    card.style.setProperty('--rotate-y', '0deg');
-                    card.style.setProperty('--scale', '1');
-                    card.style.setProperty('--bg-x', '0%');
-                    card.style.setProperty('--bg-y', '0%');
-                    card.style.setProperty('--brightness', '1');
-                    card.style.setProperty('--opacity', '0.5');
-                    card.style.setProperty('--tilt-x', '0deg');
-                };
-
-                card.addEventListener('mousemove', handleMouseMove);
-                card.addEventListener('mouseleave', handleMouseLeave);
-
-                return () => {
-                    card.removeEventListener('mousemove', handleMouseMove);
-                    card.removeEventListener('mouseleave', handleMouseLeave);
-                };
-            }, []);
 
             return (
                 <div className="card-design">
@@ -981,12 +982,17 @@
             const [roomId, setRoomId] = useState(null);
             const [youAre, setYouAre] = useState(null); // 1 ou 2
             const [localShowResults, setLocalShowResults] = useState(false);
+            const [connectionStatus, setConnectionStatus] = useState('disconnected'); // disconnected, connecting, waiting, matched
             const lastSigRef = useRef(null);
             const timersRef = useRef({});
 
             // Start new game
             const startNewGame = () => {
-                if (!socketRef.current) return;
+                if (!socketRef.current) {
+                    setConnectionStatus('disconnected');
+                    return;
+                }
+                setConnectionStatus('waiting');
                 socketRef.current.emit('queue:join');
             };
 
@@ -1035,12 +1041,20 @@
                 socketRef.current = socket;
 
                 socket.on('connect', () => {
-                    // noop
+                    setConnectionStatus('connected');
+                });
+
+                socket.on('disconnect', () => {
+                    setConnectionStatus('disconnected');
+                    setGameStarted(false);
+                    setRoomId(null);
+                    setYouAre(null);
                 });
 
                 socket.on('match:found', ({ roomId: rid, youAre: me }) => {
                     setRoomId(rid);
                     setYouAre(me);
+                    setConnectionStatus('matched');
                     setGameStarted(true);
                     setTimeout(() => calculateScale(), 10);
                 });
@@ -1100,27 +1114,52 @@
                         }}>
                             <div className="logo-placeholder" style={{ width: '200px', height: '200px' }}></div>
                             <h1 style={{ fontSize: '4rem', fontFamily: 'var(--font-family-primary)', fontWeight: '700' }}>Super Trunfo</h1>
-                            <p style={{ fontSize: '1.5rem', maxWidth: '600px', lineHeight: '1.5' }}>Compete with supercars! Choose attributes and win your opponent's cards.</p>
+                            <p style={{ fontSize: '1.5rem', maxWidth: '600px', lineHeight: '1.5' }}>
+                                Compita com supercarros! Escolha atributos e ganhe as cartas do oponente.
+                            </p>
+                            
+                            {/* Status da conexão */}
+                            <div style={{ fontSize: '1.2rem', marginBottom: '1rem' }}>
+                                {connectionStatus === 'disconnected' && '🔴 Desconectado'}
+                                {connectionStatus === 'connected' && '🟢 Conectado'}
+                                {connectionStatus === 'waiting' && '🟡 Procurando oponente...'}
+                                {connectionStatus === 'matched' && '✅ Oponente encontrado!'}
+                            </div>
+                            
                             <button 
                                 onClick={startNewGame}
+                                disabled={connectionStatus === 'waiting' || connectionStatus === 'disconnected'}
                                 style={{
                                     padding: '1rem 3rem',
                                     fontSize: '1.5rem',
                                     fontFamily: 'var(--font-family-primary)',
                                     fontWeight: '700',
-                                    backgroundColor: 'var(--color-primary)',
+                                    backgroundColor: connectionStatus === 'waiting' || connectionStatus === 'disconnected' 
+                                        ? '#666' : 'var(--color-primary)',
                                     color: 'var(--color-accent)',
                                     border: 'none',
                                     borderRadius: 'var(--border-radius-lg)',
-                                    cursor: 'pointer',
+                                    cursor: connectionStatus === 'waiting' || connectionStatus === 'disconnected' 
+                                        ? 'not-allowed' : 'pointer',
                                     transition: 'all 0.2s',
-                                    transform: 'scale(1)'
+                                    transform: 'scale(1)',
+                                    opacity: connectionStatus === 'waiting' || connectionStatus === 'disconnected' ? 0.6 : 1
                                 }}
-                                onMouseEnter={e => e.target.style.transform = 'scale(1.05)'}
+                                onMouseEnter={e => {
+                                    if (connectionStatus !== 'waiting' && connectionStatus !== 'disconnected') {
+                                        e.target.style.transform = 'scale(1.05)';
+                                    }
+                                }}
                                 onMouseLeave={e => e.target.style.transform = 'scale(1)'}
                             >
-                                Start New Game
+                                {connectionStatus === 'waiting' ? 'Procurando...' : 'Entrar na Fila'}
                             </button>
+                            
+                            {connectionStatus === 'waiting' && (
+                                <p style={{ fontSize: '1rem', color: '#ccc' }}>
+                                    Aguardando outro jogador entrar na fila...
+                                </p>
+                            )}
                         </div>
                     ) : (
                         /* Game Screen */
@@ -1149,17 +1188,24 @@
                                     
                                     {/* Game Status */}
                                     <div style={{ fontSize: '2rem', fontWeight: '700' }}>
-                                        {gameState.gamePhase === 'playing' && `Player ${gameState.currentPlayer}'s Turn`}
-                                        {gameState.gamePhase === 'comparing' && (localShowResults ? 'Result...' : 'Comparing...')}
-                                        {gameState.gamePhase === 'game_over' && `Player ${gameState.gameWinner} Wins!`}
+                                        {gameState.gamePhase === 'playing' && `Turno do Jogador ${gameState.currentPlayer}`}
+                                        {gameState.gamePhase === 'comparing' && (localShowResults ? 'Resultado...' : 'Comparando...')}
+                                        {gameState.gamePhase === 'game_over' && `Jogador ${gameState.gameWinner} Venceu!`}
                                     </div>
+                                    
+                                    {/* Indicador do jogador local */}
+                                    {youAre && (
+                                        <div style={{ fontSize: '1.2rem', color: youAre === gameState.currentPlayer ? 'var(--color-success)' : '#ccc' }}>
+                                            Você é o Jogador {youAre} {youAre === gameState.currentPlayer ? '(Sua vez!)' : '(Aguarde...)'}
+                                        </div>
+                                    )}
                                     
                                     
                                     {/* Card Counts */}
                                     <div style={{ fontSize: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                                        <div>Player 1: {gameState.player1CardCount} cards</div>
-                                        <div>Player 2: {gameState.player2CardCount} cards</div>
-                                        {gameState.potCount > 0 && <div>Pot: {gameState.potCount} cards</div>}
+                                        <div>Jogador 1: {gameState.player1CardCount} cartas</div>
+                                        <div>Jogador 2: {gameState.player2CardCount} cartas</div>
+                                        {gameState.potCount > 0 && <div>Pote: {gameState.potCount} cartas</div>}
                                     </div>
                                     
                                     {/* Comparison Result */}
@@ -1171,14 +1217,14 @@
                                             fontSize: '1.2rem'
                                         }}>
                                             <div>{CAR_DATABASE.attributes[gameState.currentComparison.attribute].name}:</div>
-                                            <div>P1: {gameState.currentComparison.player1Value} vs P2: {gameState.currentComparison.player2Value}</div>
+                                            <div>J1: {gameState.currentComparison.player1Value} vs J2: {gameState.currentComparison.player2Value}</div>
                                             {localShowResults && gameState.roundWinner && (
                                                 <div style={{ fontWeight: '700', color: 'var(--color-success)' }}>
-                                                    Player {gameState.roundWinner} Wins!
+                                                    Jogador {gameState.roundWinner} Venceu!
                                                 </div>
                                             )}
                                             {localShowResults && gameState.roundWinner === null && (
-                                                <div style={{ fontWeight: '700', color: 'var(--color-accent)' }}>Tie!</div>
+                                                <div style={{ fontWeight: '700', color: 'var(--color-accent)' }}>Empate!</div>
                                             )}
                                         </div>
                                     )}
@@ -1197,7 +1243,7 @@
                                                 cursor: 'pointer'
                                             }}
                                         >
-                                            New Game
+                                            Novo Jogo
                                         </button>
                                     )}
                                 </div>
