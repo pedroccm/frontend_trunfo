@@ -13,7 +13,7 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Socket.IO client -->
-    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" integrity="sha384-u/2WwQd4QqK1u1Aq1iQ1+Kq1K3H7h8WmKxgqYkq0B2qC9I/2p0X6QwXl8JcYQ3Qh" crossorigin="anonymous"></script>
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
     
     <!-- Import Google Font -->
     <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
@@ -460,7 +460,7 @@
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-        const SOCKET_URL = (new URLSearchParams(window.location.search)).get('backend') || 'http://localhost:3001';
+        const SOCKET_URL = (new URLSearchParams(window.location.search)).get('backend') || 'https://backend-trunfo.onrender.com';
 
         /* =================================================================
            SUPER TRUNFO GAME DATA AND LOGIC
