@@ -767,7 +767,7 @@
                     cardElement.removeEventListener('mousemove', handleMouseMove);
                     cardElement.removeEventListener('mouseleave', handleMouseLeave);
                 };
-            }, []);
+            }, [card, isOpponent, shouldShowCardBack]); // Dependências para re-executar quando carta muda
             
             // Determinar se deve mostrar carta virada (oponente) ou revelada
             const shouldShowCardBack = isOpponent && gameState.gamePhase === 'playing';
@@ -920,11 +920,14 @@
                     if (showResults) {
                         if (gameState.roundWinner === playerNumber) {
                             classes += ' winner';
+                            console.log(`🎉 Aplicando classe WINNER para Player ${playerNumber} no atributo ${specName}`);
                         } else if (gameState.roundWinner && gameState.roundWinner !== playerNumber) {
                             classes += ' loser';
+                            console.log(`😞 Aplicando classe LOSER para Player ${playerNumber} no atributo ${specName}`);
                         }
                     } else {
                         classes += ' comparing';
+                        console.log(`⏳ Aplicando classe COMPARING para Player ${playerNumber} no atributo ${specName}`);
                     }
                 }
                 
