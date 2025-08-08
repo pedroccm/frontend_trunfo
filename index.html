@@ -479,49 +479,49 @@
                 {
                     id: "mclaren_speedtail",
                     name: "McLaren Speedtail",
-                    image: "./carimage.png",
+                    image: "./CARS/mclaren_speedtail.jpg",
                     attrs: { maxSpeed: 403, power: 1070, acceleration: 2.5, displacement: 3994, weight: 1430 }
                 },
                 {
                     id: "bugatti_chiron",
                     name: "Bugatti Chiron",
-                    image: "./carimage.png",
+                    image: "./CARS/bugatti_chiron.jpg",
                     attrs: { maxSpeed: 420, power: 1479, acceleration: 2.4, displacement: 7993, weight: 1995 }
                 },
                 {
                     id: "koenigsegg_jesko",
                     name: "Koenigsegg Jesko",
-                    image: "./carimage.png",
+                    image: "./CARS/koenigsegg_jesko.jpg",
                     attrs: { maxSpeed: 530, power: 1600, acceleration: 2.5, displacement: 5000, weight: 1420 }
                 },
                 {
                     id: "ferrari_laferrari",
                     name: "Ferrari LaFerrari",
-                    image: "./carimage.png",
+                    image: "./CARS/ferrari_laferrari.jpg",
                     attrs: { maxSpeed: 372, power: 950, acceleration: 2.4, displacement: 6262, weight: 1585 }
                 },
                 {
                     id: "lamborghini_reventon",
                     name: "Lamborghini Reventon",
-                    image: "./carimage.png",
+                    image: "./CARS/lamborghini_reventon.jpg",
                     attrs: { maxSpeed: 340, power: 650, acceleration: 3.3, displacement: 6496, weight: 1665 }
                 },
                 {
                     id: "porsche_918_spyder",
                     name: "Porsche 918 Spyder",
-                    image: "./carimage.png",
+                    image: "./CARS/porsche_918_spyder.jpg",
                     attrs: { maxSpeed: 345, power: 887, acceleration: 2.2, displacement: 4593, weight: 1674 }
                 },
                 {
                     id: "aston_martin_valkyrie",
                     name: "Aston Martin Valkyrie",
-                    image: "./carimage.png",
+                    image: "./CARS/aston_martin_valkyrie.jpg",
                     attrs: { maxSpeed: 402, power: 1160, acceleration: 2.5, displacement: 6500, weight: 1030 }
                 },
                 {
                     id: "mercedes_amg_one",
                     name: "Mercedes-AMG ONE",
-                    image: "./carimage.png",
+                    image: "./CARS/mercedes_amg_one.jpg",
                     attrs: { maxSpeed: 352, power: 1063, acceleration: 2.9, displacement: 1600, weight: 1695 }
                 }
             ]
@@ -694,7 +694,9 @@
             gameState,
             onSpecClick,
             isActive = false,
-            showResults = false
+            showResults = false,
+            youAre = null,
+            isOpponent = false
         }) => {
             const cardRef = useRef(null);
             const [showConfetti, setShowConfetti] = useState(false);
@@ -767,6 +769,10 @@
                 };
             }, []);
             
+            // Determinar se deve mostrar carta virada (oponente) ou revelada
+            const shouldShowCardBack = isOpponent && gameState.gamePhase === 'playing';
+            const shouldRevealCard = !shouldShowCardBack || (gameState.gamePhase === 'comparing' && showResults);
+            
             // Display card info or placeholder APÓS todos os hooks
             if (!card) {
                 return (
@@ -779,6 +785,45 @@
                                 <div style={{width: '100%', height: '438px', background: 'rgba(255,255,255,0.1)', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent)'}}>Sem Carta</div>
                             </div>
                             <div className="car-specs"></div>
+                            <div className="card-footer">Super Trunfo Online</div>
+                        </div>
+                    </div>
+                );
+            }
+            
+            // Se é carta do oponente e está na fase de jogo, mostrar verso
+            if (shouldShowCardBack) {
+                return (
+                    <div className="card-design">
+                        <div className="card" ref={cardRef}>
+                            <div className="car-model">
+                                <div className="car-model-text">Carta Oculta</div>
+                            </div>
+                            <div className="image-container">
+                                <img 
+                                    className="car-image" 
+                                    src="./card-verso.png" 
+                                    alt="Carta virada"
+                                    style={{ filter: 'brightness(0.8)' }}
+                                />
+                            </div>
+                            <div className="car-specs">
+                                <div className="spec-row" style={{ justifyContent: 'center' }}>
+                                    <div className="spec-label">???</div>
+                                </div>
+                                <div className="spec-row" style={{ justifyContent: 'center' }}>
+                                    <div className="spec-label">???</div>
+                                </div>
+                                <div className="spec-row" style={{ justifyContent: 'center' }}>
+                                    <div className="spec-label">???</div>
+                                </div>
+                                <div className="spec-row" style={{ justifyContent: 'center' }}>
+                                    <div className="spec-label">???</div>
+                                </div>
+                                <div className="spec-row" style={{ justifyContent: 'center' }}>
+                                    <div className="spec-label">???</div>
+                                </div>
+                            </div>
                             <div className="card-footer">Super Trunfo Online</div>
                         </div>
                     </div>
@@ -1172,6 +1217,8 @@
                                     onSpecClick={handleSpecClick}
                                     isActive={gameState.currentPlayer === 1}
                                     showResults={localShowResults}
+                                    youAre={youAre}
+                                    isOpponent={youAre !== 1}
                                 />
                                 
                                 {/* Middle column with game info */}
@@ -1197,6 +1244,25 @@
                                     {youAre && (
                                         <div style={{ fontSize: '1.2rem', color: youAre === gameState.currentPlayer ? 'var(--color-success)' : '#ccc' }}>
                                             Você é o Jogador {youAre} {youAre === gameState.currentPlayer ? '(Sua vez!)' : '(Aguarde...)'}
+                                        </div>
+                                    )}
+                                    
+                                    {/* Resultado da última rodada */}
+                                    {gameState.gamePhase === 'comparing' && localShowResults && gameState.roundWinner && (
+                                        <div style={{ 
+                                            fontSize: '1.8rem', 
+                                            fontWeight: '700',
+                                            color: gameState.roundWinner === youAre ? 'var(--color-success)' : 'var(--color-danger)',
+                                            textAlign: 'center',
+                                            padding: '1rem',
+                                            backgroundColor: 'rgba(0,0,0,0.7)',
+                                            borderRadius: 'var(--border-radius-lg)',
+                                            border: `2px solid ${gameState.roundWinner === youAre ? 'var(--color-success)' : 'var(--color-danger)'}`
+                                        }}>
+                                            {gameState.roundWinner === youAre ? '🎉 VOCÊ VENCEU! 🎉' : '😞 Você perdeu...'}
+                                            <div style={{ fontSize: '1rem', marginTop: '0.5rem', color: '#ccc' }}>
+                                                {gameState.roundWinner === youAre ? 'Você ganha as cartas e continua jogando!' : 'Oponente ganha as cartas e joga novamente.'}
+                                            </div>
                                         </div>
                                     )}
                                     
@@ -1255,6 +1321,8 @@
                                     onSpecClick={handleSpecClick}
                                     isActive={gameState.currentPlayer === 2}
                                     showResults={localShowResults}
+                                    youAre={youAre}
+                                    isOpponent={youAre !== 2}
                                 />
                             </div>
                         </>
