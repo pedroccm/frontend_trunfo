@@ -530,7 +530,7 @@
         // Function to load car data from JSON (optional enhancement)
         const loadCarDatabase = async () => {
             try {
-                const response = await fetch('./CARS/cars.json');
+                const response = await fetch(`./CARS/cars.json?v=${Date.now()}`);
                 const data = await response.json();
                 CAR_DATABASE = data;
                 console.log('Loaded', data.cards.length, 'cars from JSON');
@@ -1117,7 +1117,7 @@
                             lastSigRef.current = sig;
                             setLocalShowResults(false);
                             clearTimeout(timersRef.current.showTimer);
-                            timersRef.current.showTimer = setTimeout(() => setLocalShowResults(true), 700);
+                            timersRef.current.showTimer = setTimeout(() => setLocalShowResults(true), 1500);
                         }
                     } else {
                         lastSigRef.current = null;
