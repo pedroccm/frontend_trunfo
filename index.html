@@ -466,77 +466,23 @@
            SUPER TRUNFO GAME DATA AND LOGIC
            ================================================================= */
         
-        // Car database with Super Trunfo attributes (will be replaced by JSON loading)
-        let CAR_DATABASE = {
-            attributes: {
-                maxSpeed: { name: "Velocidade Máxima", unit: "Km/h", direction: "max" },
-                power: { name: "Potência", unit: "HP", direction: "max" },
-                acceleration: { name: "0-100 Km/h", unit: "seg", direction: "min" },
-                displacement: { name: "Cilindradas", unit: "cc", direction: "max" },
-                weight: { name: "Peso", unit: "Kg", direction: "min" }
-            },
-            cards: [
-                {
-                    id: "mclaren_speedtail",
-                    name: "McLaren Speedtail",
-                    image: "./CARS/mclaren_speedtail.jpg",
-                    attrs: { maxSpeed: 403, power: 1070, acceleration: 2.5, displacement: 3994, weight: 1430 }
-                },
-                {
-                    id: "bugatti_chiron",
-                    name: "Bugatti Chiron",
-                    image: "./CARS/bugatti_chiron.jpg",
-                    attrs: { maxSpeed: 420, power: 1479, acceleration: 2.4, displacement: 7993, weight: 1995 }
-                },
-                {
-                    id: "koenigsegg_jesko",
-                    name: "Koenigsegg Jesko",
-                    image: "./CARS/koenigsegg_jesko.jpg",
-                    attrs: { maxSpeed: 530, power: 1600, acceleration: 2.5, displacement: 5000, weight: 1420 }
-                },
-                {
-                    id: "ferrari_laferrari",
-                    name: "Ferrari LaFerrari",
-                    image: "./CARS/ferrari_laferrari.jpg",
-                    attrs: { maxSpeed: 372, power: 950, acceleration: 2.4, displacement: 6262, weight: 1585 }
-                },
-                {
-                    id: "lamborghini_reventon",
-                    name: "Lamborghini Reventon",
-                    image: "./CARS/lamborghini_reventon.jpg",
-                    attrs: { maxSpeed: 340, power: 650, acceleration: 3.3, displacement: 6496, weight: 1665 }
-                },
-                {
-                    id: "porsche_918_spyder",
-                    name: "Porsche 918 Spyder",
-                    image: "./CARS/porsche_918_spyder.jpg",
-                    attrs: { maxSpeed: 345, power: 887, acceleration: 2.2, displacement: 4593, weight: 1674 }
-                },
-                {
-                    id: "aston_martin_valkyrie",
-                    name: "Aston Martin Valkyrie",
-                    image: "./CARS/aston_martin_valkyrie.jpg",
-                    attrs: { maxSpeed: 402, power: 1160, acceleration: 2.5, displacement: 6500, weight: 1030 }
-                },
-                {
-                    id: "mercedes_amg_one",
-                    name: "Mercedes-AMG ONE",
-                    image: "./CARS/mercedes_amg_one.jpg",
-                    attrs: { maxSpeed: 352, power: 1063, acceleration: 2.9, displacement: 1600, weight: 1695 }
-                }
-            ]
-        };
+        // Car database - será carregado do JSON
+        let CAR_DATABASE = null;
         
-        // Function to load car data from JSON (optional enhancement)
+        // Function to load car data from JSON (obrigatório)
         const loadCarDatabase = async () => {
             try {
                 const response = await fetch(`./CARS/cars.json?v=${Date.now()}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
                 const data = await response.json();
                 CAR_DATABASE = data;
-                console.log('Loaded', data.cards.length, 'cars from JSON');
+                console.log('✅ Carregado JSON com', data.cards.length, 'carros');
                 return true;
             } catch (error) {
-                console.log('Failed to load JSON, using inline data:', error.message);
+                console.error('❌ ERRO: Não foi possível carregar cars.json:', error.message);
+                alert('Erro ao carregar dados dos carros. Verifique se o arquivo cars.json existe.');
                 return false;
             }
         };
@@ -916,18 +862,26 @@
                     gameState.currentComparison && 
                     gameState.currentComparison.attribute === specName) {
                     
+                    console.log(`🔍 DEBUG Player ${playerNumber}:`, {
+                        specName,
+                        showResults,
+                        roundWinner: gameState.roundWinner,
+                        playerNumber,
+                        gamePhase: gameState.gamePhase
+                    });
+                    
                     // First show comparing animation, then results
                     if (showResults) {
                         if (gameState.roundWinner === playerNumber) {
                             classes += ' winner';
-                            console.log(`🎉 Aplicando classe WINNER para Player ${playerNumber} no atributo ${specName}`);
+                            console.log(`🎉 V2.1 - WINNER aplicado: Player ${playerNumber}, atributo ${specName}`);
                         } else if (gameState.roundWinner && gameState.roundWinner !== playerNumber) {
                             classes += ' loser';
-                            console.log(`😞 Aplicando classe LOSER para Player ${playerNumber} no atributo ${specName}`);
+                            console.log(`😞 V2.1 - LOSER aplicado: Player ${playerNumber}, atributo ${specName}`);
                         }
                     } else {
                         classes += ' comparing';
-                        console.log(`⏳ Aplicando classe COMPARING para Player ${playerNumber} no atributo ${specName}`);
+                        console.log(`⏳ V2.1 - COMPARING aplicado: Player ${playerNumber}, atributo ${specName}`);
                     }
                 }
                 
@@ -1108,22 +1062,16 @@
                 });
 
                 socket.on('game:state', (state) => {
+                    console.log('🎮 VERSÃO 2.1 - Estado recebido:', {
+                        gamePhase: state.gamePhase,
+                        roundWinner: state.roundWinner,
+                        showResults: state.showResults,
+                        currentComparison: state.currentComparison
+                    });
                     setGameState(state);
-
-                    // Manage local showResults to create winner/loser highlight while comparing
-                    if (state.gamePhase === 'comparing' && state.currentComparison) {
-                        const sig = `${state.currentComparison.attribute}|${state.currentComparison.player1Value}|${state.currentComparison.player2Value}`;
-                        if (lastSigRef.current !== sig) {
-                            lastSigRef.current = sig;
-                            setLocalShowResults(false);
-                            clearTimeout(timersRef.current.showTimer);
-                            timersRef.current.showTimer = setTimeout(() => setLocalShowResults(true), 1500);
-                        }
-                    } else {
-                        lastSigRef.current = null;
-                        setLocalShowResults(false);
-                        clearTimeout(timersRef.current.showTimer);
-                    }
+                    // Backend agora controla showResults via state.showResults
+                    setLocalShowResults(state.showResults || false);
+                    console.log('🔄 localShowResults setado para:', state.showResults || false);
                 });
 
                 // Calculate on mount and resize

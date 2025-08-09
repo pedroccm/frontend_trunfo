@@ -209,10 +209,10 @@
         },
         {
             "id": "koenigsegg_jesko_absolut",
-            "name": "Koenigsegg Jesko Absolut",
+            "name": "Koenigsegg qwJesko Absolut",
             "image": "./CARS/koenigsegg_jesko_absolut.png",
             "attrs": {
-                "maxSpeed": 530,
+                "maxSpeed": 5830,
                 "power": 1600,
                 "acceleration": 2.5,
                 "displacement": 5000,

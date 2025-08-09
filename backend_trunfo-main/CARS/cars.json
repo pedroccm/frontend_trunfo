@@ -53,10 +53,10 @@
         },
         {
             "id": "koenigsegg_jesko",
-            "name": "Koenigsegg Jesko22",
+            "name": "Koenigsegg Jesko",
             "image": "./CARS/koenigsegg_jesko.jpg",
             "attrs": {
-                "maxSpeed": 5730,
+                "maxSpeed": 530,
                 "power": 1600,
                 "acceleration": 2.5,
                 "displacement": 5000,
@@ -149,3 +149,4 @@
         }
     ]
 }
+
