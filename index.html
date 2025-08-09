@@ -175,6 +175,12 @@
             transition: all 0.1s ease;
         }
 
+        /* Disable holographic effect for card back images */
+        .card:has(img[src*="card-verso"])::before,
+        .card:has(img[alt*="Carta virada"])::before {
+            display: none;
+        }
+
         /* Car Model Header */
         .car-model {
             width: 100%;
@@ -440,6 +446,45 @@
             flex-shrink: 0;
         }
 
+        /* =================================================================
+           CARD FLIP ANIMATION - For revealing opponent cards
+           ================================================================= */
+        .card-flip-container {
+            perspective: 1000px;
+            width: 750px;
+            height: 1050px;
+        }
+
+        .card-flip-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-style: preserve-3d;
+        }
+
+        .card-flip-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-flip-front,
+        .card-flip-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: var(--border-radius-xl);
+        }
+
+        .card-flip-front {
+            /* Verso da carta (card-verso.png) */
+        }
+
+        .card-flip-back {
+            /* Frente da carta (dados revelados) */
+            transform: rotateY(180deg);
+        }
+
         /* Card Footer */
         .card-footer {
             width: 100%;
@@ -646,6 +691,45 @@
         }) => {
             const cardRef = useRef(null);
             const [showConfetti, setShowConfetti] = useState(false);
+            const [isFlipped, setIsFlipped] = useState(false);
+            const [shouldShowCardBack, setShouldShowCardBack] = useState(false);
+            
+            // Controlar flip e exibição da carta
+            useEffect(() => {
+                const isOpponentCard = isOpponent;
+                const isInPlayingPhase = gameState.gamePhase === 'playing';
+                const isInComparingPhase = gameState.gamePhase === 'comparing';
+                
+                // Se é carta do oponente
+                if (isOpponentCard) {
+                    if (isInPlayingPhase) {
+                        // Durante jogo: mostrar verso, não flipped
+                        setShouldShowCardBack(true);
+                        setIsFlipped(false);
+                    } else if (isInComparingPhase) {
+                        // Durante comparação: manter estrutura de flip
+                        setShouldShowCardBack(false);
+                        
+                        // LOGO que entra na fase comparing: fazer flip imediatamente
+                        // (ANTES das animações de listras)
+                        setTimeout(() => {
+                            setIsFlipped(true);
+                            console.log('🔄 V2.2 - FLIP IMEDIATO na comparação para Player', playerNumber);
+                        }, 200); // Delay mínimo para transição suave
+                    }
+                } else {
+                    // Não é oponente: nunca usar flip
+                    setShouldShowCardBack(false);
+                    setIsFlipped(false);
+                }
+            }, [isOpponent, gameState.gamePhase, playerNumber]);
+            
+            // Reset flip quando o jogo reinicia
+            useEffect(() => {
+                if (gameState.gamePhase === 'playing') {
+                    setIsFlipped(false);
+                }
+            }, [gameState.gamePhase]);
             
             // SEMPRE chamar todos os hooks primeiro (antes de returns condicionais)
             // Handle confetti when this player wins (only after results are shown)
@@ -713,11 +797,7 @@
                     cardElement.removeEventListener('mousemove', handleMouseMove);
                     cardElement.removeEventListener('mouseleave', handleMouseLeave);
                 };
-            }, [card, isOpponent, shouldShowCardBack]); // Dependências para re-executar quando carta muda
-            
-            // Determinar se deve mostrar carta virada (oponente) ou revelada
-            const shouldShowCardBack = isOpponent && gameState.gamePhase === 'playing';
-            const shouldRevealCard = !shouldShowCardBack || (gameState.gamePhase === 'comparing' && showResults);
+            }, [card]); // Dependências para re-executar quando carta muda
             
             // Display card info or placeholder APÓS todos os hooks
             if (!card) {
@@ -736,45 +816,6 @@
                     </div>
                 );
             }
-            
-            // Se é carta do oponente e está na fase de jogo, mostrar verso
-            if (shouldShowCardBack) {
-                return (
-                    <div className="card-design">
-                        <div className="card" ref={cardRef}>
-                            <div className="car-model">
-                                <div className="car-model-text">Carta Oculta</div>
-                            </div>
-                            <div className="image-container">
-                                <img 
-                                    className="car-image" 
-                                    src="./card-verso.png" 
-                                    alt="Carta virada"
-                                    style={{ filter: 'brightness(0.8)' }}
-                                />
-                            </div>
-                            <div className="car-specs">
-                                <div className="spec-row" style={{ justifyContent: 'center' }}>
-                                    <div className="spec-label">???</div>
-                                </div>
-                                <div className="spec-row" style={{ justifyContent: 'center' }}>
-                                    <div className="spec-label">???</div>
-                                </div>
-                                <div className="spec-row" style={{ justifyContent: 'center' }}>
-                                    <div className="spec-label">???</div>
-                                </div>
-                                <div className="spec-row" style={{ justifyContent: 'center' }}>
-                                    <div className="spec-label">???</div>
-                                </div>
-                                <div className="spec-row" style={{ justifyContent: 'center' }}>
-                                    <div className="spec-label">???</div>
-                                </div>
-                            </div>
-                            <div className="card-footer">Super Trunfo Online</div>
-                        </div>
-                    </div>
-                );
-            }
 
             const handleSpecClick = (specName) => {
                 // Only allow current player to click during playing phase
@@ -782,6 +823,155 @@
                 
                 onSpecClick(specName);
             };
+
+            /* =================================================================
+               SPEC ROW CLASS CALCULATION
+               Determines the visual state based on game state and comparison results
+               ================================================================= */
+            const getSpecRowClass = (specName) => {
+                let classes = 'spec-row';
+                
+                // Show comparing state for the selected attribute
+                if (gameState.gamePhase === 'comparing' && 
+                    gameState.currentComparison && 
+                    gameState.currentComparison.attribute === specName) {
+                    
+                    console.log(`🔍 DEBUG Player ${playerNumber}:`, {
+                        specName,
+                        showResults,
+                        roundWinner: gameState.roundWinner,
+                        playerNumber,
+                        gamePhase: gameState.gamePhase
+                    });
+                    
+                    // First show comparing animation, then results
+                    if (showResults) {
+                        if (gameState.roundWinner === playerNumber) {
+                            classes += ' winner';
+                            console.log(`🎉 V2.2 - WINNER aplicado: Player ${playerNumber}, atributo ${specName}`);
+                        } else if (gameState.roundWinner && gameState.roundWinner !== playerNumber) {
+                            classes += ' loser';
+                            console.log(`😞 V2.2 - LOSER aplicado: Player ${playerNumber}, atributo ${specName}`);
+                        }
+                    } else {
+                        classes += ' comparing';
+                        console.log(`⏳ V2.2 - COMPARING aplicado: Player ${playerNumber}, atributo ${specName}`);
+                    }
+                }
+                
+                return classes;
+            };
+
+            // Função para renderizar carta revelada (usada no flip)
+            const renderRevealedCard = () => (
+                <div className="card" ref={cardRef}>
+                    <div className="car-model">
+                        <div className="car-model-text">{card.name}</div>
+                    </div>
+                    
+                    <div className="image-container">
+                        <img 
+                            className="car-image" 
+                            src={card.image} 
+                            alt={card.name}
+                        />
+                    </div>
+                    
+                    <div className="car-specs">
+                        <div 
+                            className={getSpecRowClass('maxSpeed')}
+                            onClick={() => handleSpecClick('maxSpeed')}
+                            style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                        >
+                            <div className="spec-label">{CAR_DATABASE.attributes.maxSpeed.name}</div>
+                            <div className="spec-value">{card.attrs.maxSpeed} {CAR_DATABASE.attributes.maxSpeed.unit}</div>
+                        </div>
+                        
+                        <div 
+                            className={getSpecRowClass('power')}
+                            onClick={() => handleSpecClick('power')}
+                            style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                        >
+                            <div className="spec-label">{CAR_DATABASE.attributes.power.name}</div>
+                            <div className="spec-value">{card.attrs.power} {CAR_DATABASE.attributes.power.unit}</div>
+                        </div>
+                        
+                        <div 
+                            className={getSpecRowClass('acceleration')}
+                            onClick={() => handleSpecClick('acceleration')}
+                            style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                        >
+                            <div className="spec-label">{CAR_DATABASE.attributes.acceleration.name}</div>
+                            <div className="spec-value">{card.attrs.acceleration} {CAR_DATABASE.attributes.acceleration.unit}</div>
+                        </div>
+                        
+                        <div 
+                            className={getSpecRowClass('displacement')}
+                            onClick={() => handleSpecClick('displacement')}
+                            style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                        >
+                            <div className="spec-label">{CAR_DATABASE.attributes.displacement.name}</div>
+                            <div className="spec-value">{card.attrs.displacement} {CAR_DATABASE.attributes.displacement.unit}</div>
+                        </div>
+                        
+                        <div 
+                            className={getSpecRowClass('weight')}
+                            onClick={() => handleSpecClick('weight')}
+                            style={{ cursor: (isActive && gameState.gamePhase === 'playing' && gameState.currentPlayer === playerNumber) ? 'pointer' : 'default' }}
+                        >
+                            <div className="spec-label">{CAR_DATABASE.attributes.weight.name}</div>
+                            <div className="spec-value">{card.attrs.weight} {CAR_DATABASE.attributes.weight.unit}</div>
+                        </div>
+                    </div>
+                    
+                    <div className="card-footer">
+                        Super Trunfo Online
+                    </div>
+                </div>
+            );
+
+            // Renderizar carta com flip se for oponente na fase de comparação
+            if (isOpponent && gameState.gamePhase === 'comparing') {
+                return (
+                    <div className="card-design">
+                        <div className="card-flip-container">
+                            <div className={`card-flip-inner ${isFlipped ? 'flipped' : ''}`}>
+                                {/* FRENTE: Verso da carta */}
+                                <div className="card-flip-front">
+                                    <div 
+                                        ref={cardRef}
+                                        className="card"
+                                        style={{
+                                            padding: 0,
+                                            background: 'none'
+                                        }}
+                                    >
+                                        <img 
+                                            src="./card-verso.png" 
+                                            alt="Carta virada"
+                                            style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                objectFit: 'cover',
+                                                display: 'block',
+                                                border: 'none',
+                                                borderRadius: 0,
+                                                position: 'relative',
+                                                zIndex: 10
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                
+                                {/* VERSO: Carta revelada com dados */}
+                                <div className="card-flip-back">
+                                    {renderRevealedCard()}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
 
             /* =================================================================
                CONFETTI CELEBRATION SYSTEM
@@ -850,46 +1040,38 @@
                 }
             };
 
-            /* =================================================================
-               SPEC ROW CLASS CALCULATION
-               Determines the visual state based on game state and comparison results
-               ================================================================= */
-            const getSpecRowClass = (specName) => {
-                let classes = 'spec-row';
-                
-                // Show comparing state for the selected attribute
-                if (gameState.gamePhase === 'comparing' && 
-                    gameState.currentComparison && 
-                    gameState.currentComparison.attribute === specName) {
-                    
-                    console.log(`🔍 DEBUG Player ${playerNumber}:`, {
-                        specName,
-                        showResults,
-                        roundWinner: gameState.roundWinner,
-                        playerNumber,
-                        gamePhase: gameState.gamePhase
-                    });
-                    
-                    // First show comparing animation, then results
-                    if (showResults) {
-                        if (gameState.roundWinner === playerNumber) {
-                            classes += ' winner';
-                            console.log(`🎉 V2.1 - WINNER aplicado: Player ${playerNumber}, atributo ${specName}`);
-                        } else if (gameState.roundWinner && gameState.roundWinner !== playerNumber) {
-                            classes += ' loser';
-                            console.log(`😞 V2.1 - LOSER aplicado: Player ${playerNumber}, atributo ${specName}`);
-                        }
-                    } else {
-                        classes += ' comparing';
-                        console.log(`⏳ V2.1 - COMPARING aplicado: Player ${playerNumber}, atributo ${specName}`);
-                    }
-                }
-                
-                return classes;
-            };
+            // Renderizar verso simples se for oponente durante o jogo
+            if (shouldShowCardBack) {
+                return (
+                    <div className="card-design">
+                        <div 
+                            ref={cardRef}
+                            className="card" 
+                            style={{
+                                padding: 0,
+                                background: 'none'
+                            }}
+                        >
+                            <img 
+                                src="./card-verso.png" 
+                                alt="Carta virada"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                    border: 'none',
+                                    borderRadius: 0,
+                                    position: 'relative',
+                                    zIndex: 10
+                                }}
+                            />
+                        </div>
+                    </div>
+                );
+            }
 
-
-
+            // Carta normal (não é oponente ou já foi revelada)
             return (
                 <div className="card-design">
                     <div className="card" ref={cardRef}>
@@ -1062,7 +1244,7 @@
                 });
 
                 socket.on('game:state', (state) => {
-                    console.log('🎮 VERSÃO 2.1 - Estado recebido:', {
+                    console.log('🎮 VERSÃO 2.2 - Estado recebido:', {
                         gamePhase: state.gamePhase,
                         roundWinner: state.roundWinner,
                         showResults: state.showResults,
