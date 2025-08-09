@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual Card Test</title>
+    
+    <!-- React and ReactDOM from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- Babel Standalone for JSX transformation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Import Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Variables from Style Guide */
+        :root {
+            --color-primary: #E54E44;
+            --color-secondary: #0F0F0F;
+            --color-accent: #FFFFDE;
+            --color-success: #22C55E;
+            --color-danger: #EF4444;
+            --font-family-primary: 'Roboto Condensed', sans-serif;
+            --border-radius-lg: 20px;
+            --border-radius-xl: 30px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+        }
+
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family-primary);
+            background-color: var(--color-accent);
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        /* Viewport Container - Always fits screen */
+        .viewport-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--color-accent);
+            overflow: hidden;
+            gap: var(--spacing-lg);
+        }
+
+        /* Scalable wrapper - this will be scaled */
+        .scalable-wrapper {
+            transform-origin: center center;
+            display: flex;
+            gap: var(--spacing-lg);
+        }
+
+        /* Original Card Design - Fixed dimensions */
+        .card-design {
+            width: 750px;
+            height: 1050px;
+            position: relative;
+        }
+
+        .card {
+            width: 750px;
+            height: 1050px;
+            position: relative;
+            background-color: #0F0F0F;
+            background-image: url('./card-back.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: var(--border-radius-xl);
+            padding: var(--spacing-xl);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-xl);
+            box-shadow: 0 8px 32px rgba(15, 15, 15, 0.3);
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* Car Model Header */
+        .car-model {
+            width: 100%;
+            background-color: var(--color-primary);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-md) var(--spacing-lg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .car-model-text {
+            color: var(--color-accent);
+            font-family: var(--font-family-primary);
+            font-weight: 700;
+            font-size: 48px;
+            text-align: center;
+            word-wrap: break-word;
+        }
+
+        /* Image Container */
+        .image-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .car-image {
+            width: 100%;
+            height: 438px;
+            object-fit: cover;
+            border-radius: var(--border-radius-lg);
+        }
+
+        /* Car Specifications */
+        .car-specs {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-sm);
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+
+        .spec-row {
+            width: 100%;
+            height: 58px;
+            background-color: var(--color-secondary);
+            border: 1px solid var(--color-accent);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-sm) var(--spacing-md);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .spec-label,
+        .spec-value {
+            color: var(--color-accent);
+            font-family: var(--font-family-primary);
+            font-weight: 700;
+            font-size: 32px;
+            word-wrap: break-word;
+        }
+
+        .spec-value {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        /* Card Footer */
+        .card-footer {
+            width: 100%;
+            text-align: center;
+            color: var(--color-accent);
+            font-family: var(--font-family-primary);
+            font-style: italic;
+            font-weight: 400;
+            font-size: 24px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const SimpleCard = ({ carModel, carImage, maxSpeed, power, acceleration, displacement, weight }) => {
+            return (
+                <div className="card-design">
+                    <div className="card">
+                        <div className="car-model">
+                            <div className="car-model-text">{carModel}</div>
+                        </div>
+                        
+                        <div className="image-container">
+                            <img 
+                                className="car-image" 
+                                src={carImage} 
+                                alt={carModel}
+                            />
+                        </div>
+                        
+                        <div className="car-specs">
+                            <div className="spec-row">
+                                <div className="spec-label">Velocidade Máxima</div>
+                                <div className="spec-value">{maxSpeed}</div>
+                            </div>
+                            
+                            <div className="spec-row">
+                                <div className="spec-label">Potência</div>
+                                <div className="spec-value">{power}</div>
+                            </div>
+                            
+                            <div className="spec-row">
+                                <div className="spec-label">0-100 Km/h</div>
+                                <div className="spec-value">{acceleration}</div>
+                            </div>
+                            
+                            <div className="spec-row">
+                                <div className="spec-label">Cilindradas</div>
+                                <div className="spec-value">{displacement}</div>
+                            </div>
+                            
+                            <div className="spec-row">
+                                <div className="spec-label">Peso</div>
+                                <div className="spec-value">{weight}</div>
+                            </div>
+                        </div>
+                        
+                        <div className="card-footer">
+                            Super Trunfo Online
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const DualCardContainer = () => {
+            const wrapperRef = useRef(null);
+
+            useEffect(() => {
+                const calculateScale = () => {
+                    if (!wrapperRef.current) return;
+
+                    const wrapper = wrapperRef.current;
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    
+                    // Original card dimensions
+                    const cardWidth = 750;
+                    const cardHeight = 1050;
+                    
+                    // Account for two cards side by side with gap
+                    const totalWidth = (cardWidth * 2) + 24; // 24px gap
+                    
+                    // Calculate scale factors for both dimensions
+                    const scaleX = viewportWidth / totalWidth;
+                    const scaleY = viewportHeight / cardHeight;
+                    
+                    // Use the smaller scale to ensure it fits completely
+                    const scale = Math.min(scaleX, scaleY) * 0.95; // 0.95 for small margin
+                    
+                    wrapper.style.transform = `scale(${scale})`;
+                };
+
+                // Calculate on mount and resize
+                calculateScale();
+                window.addEventListener('resize', calculateScale);
+
+                return () => {
+                    window.removeEventListener('resize', calculateScale);
+                };
+            }, []);
+
+            return (
+                <div className="viewport-container">
+                    <div className="scalable-wrapper" ref={wrapperRef}>
+                        <SimpleCard 
+                            carModel="McLaren Speedtail"
+                            carImage="./carimage.png"
+                            maxSpeed="403 Km/h"
+                            power="1070 HP"
+                            acceleration="2.5 seg"
+                            displacement="3994 cc"
+                            weight="1430 Kg"
+                        />
+                        <SimpleCard 
+                            carModel="McLaren Speedtail"
+                            carImage="./carimage.png"
+                            maxSpeed="403 Km/h"
+                            power="1070 HP"
+                            acceleration="2.5 seg"
+                            displacement="3994 cc"
+                            weight="1430 Kg"
+                        />
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            return <DualCardContainer />;
+        };
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
